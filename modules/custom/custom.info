@@ -1,0 +1,5 @@
+
+
+name = Custom autocomplete
+description = Autocomplete for Webform Textfield.
+core = 6.x

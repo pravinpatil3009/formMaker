@@ -1,0 +1,154 @@
+<?php
+if(!empty($_POST))
+{
+	/**GET THE KEYWORD THAT NEEDS TO BE SEARCHED **/
+	$keyword = $_POST['element_1'];
+
+	/**CONNECTION ESTABLISHMENT **/
+	$con = mysql_connect('localhost','drupal','socionity123','drupal');
+	if(!$con)
+	{
+		echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		exit;
+	}
+	mysql_select_db('drupal', $con);
+
+	
+	/** GET NID OF WEBFORM THAT NEEDS TO BE SEARCHED  **/
+	$query1 = 'select nid from node where title="'.$keyword.'"';
+	$result = mysql_query($query1);
+	$nid = mysql_fetch_row($result); // $nid[0] is the nid obtained from keyword
+
+	/** GET THE RESULTS OF THE QUERY FROM DATABASE**/
+	$query = 'select distinct users.name , webform_submitted_data.nid , webform_submitted_data.sid, webform_submitted_data.cid, webform_submitted_data.data from webform_submissions join users on users.uid = webform_submissions.uid join webform_submitted_data on  webform_submissions.nid = webform_submitted_data.nid where webform_submissions.nid="'.$nid[0].'"';
+	$result = mysql_query($query);
+
+	/**GET THE NUMBER OF COMPONENT FOR SELECTED NID **/
+	$query3 = 'select count(*) from webform_component where nid='.$nid[0];
+	$r = mysql_query($query3);
+	$r1 = mysql_fetch_row($r);
+	$components = (int)($r1[0]);
+
+	/**ADD OWN MARKUP FOR CSS **/
+	$markup = '<div class="results">';
+
+
+	/** DISPLAY THE RESUTLS IN TABULAR FORMAT**/
+	echo $markup;
+
+	if(mysql_num_rows($result)==0)
+	{
+		echo "<h3>There were no entries found</h3>";
+		echo "</div>";
+	}
+	else{
+
+	echo "<table>";
+	
+	$unique = 0;
+	$old = 0;
+	$drupal_path = "formMaker/drupal/node/".$nid[0]."/submission/";	
+	echo "<th>Form Name</th>";
+	echo "<th>Submitted by</th>";
+	echo "<th>Data</th>";
+	while($row1 = mysql_fetch_row($result))
+	{
+		$unique = $row1[2];
+		if($unique != $old)
+		{
+			echo "<tr>";
+			echo "<td><a href='/".$drupal_path.$row1[2] ."' >Link to Submission</a>"."</td>";
+			echo "</tr>";
+		}
+		else
+		{
+			echo "<tr>";
+			echo "<td>".$keyword."</td>";
+			echo "<td>".$row1[0]."</td>";
+			echo "<td>".$row1[4]."</td>";
+			echo "</tr>";
+		}
+		$old = $row1[2];
+	}
+	echo "</table>";
+	echo "</div>";
+	}
+}
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Educational Templates Search</title>
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/base/minified/jquery-ui.min.css" type="text/css" /> 
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.10.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="view.css" media="all">
+<link rel="stylesheet" type="text/css" href="test.css" media="all">
+<script type="text/javascript" src="view.js"></script>
+<script type="text/javascript">
+$(function() {
+	//autocomplete
+	$(".text").autocomplete({
+		source: "http://socionity.iiit.ac.in/formMaker/retrieve/search.php",
+			minLength: 1
+	});				
+
+});
+</script>
+</head>
+<body id="main_body" >
+
+	<!--img id="top" src="top.png" alt=""-->
+	<div id="form_container">
+
+		<h1><a>Educational Templates Search</a></h1>
+		<form id="form_678421" name="myform" class="appnitro"  method="post" action="form.php">
+					<div class="form_description">
+			<h2>Education Templates Search</h2>
+			<p>Search the ET for information</p>
+		</div>						
+			<ul >
+
+					<li id="li_1" >
+		<label class="description" for="element_1">Keyword </label>
+		<div>
+			<input id="element_1" name="element_1" class="element text medium"  type="text" maxlength="255" value=""/> 
+		</div><p class="guidelines" id="guide_1"><small>Enter the form title you want to search, please select from autocomplete dropdown</small></p> 
+		</li>		<li id="li_2" >
+		<label class="description" for="element_2">Places where you want to search </label>
+		<span>
+			<input id="element_2_1" name="element_2_1" class="element checkbox" type="checkbox" value="1" />
+<label class="choice" for="element_2_1">Venkatrampuram</label>
+<input id="element_2_2" name="element_2_2" class="element checkbox" type="checkbox" value="1" />
+<label class="choice" for="element_2_2">Belgaum</label>
+
+		</span>
+		</li>
+
+					<li class="buttons">
+			    <input type="hidden" name="form_id" value="678421" />
+
+				<input id="saveForm" class="button_text" type="submit" name="submit" value="Submit" />
+		</li>
+			</ul>
+		</form>	
+		<ul>
+		<li>
+		<h2><a href="/api/opendata/demo/keyword.php">Keyword Search</a></h2>
+		</li>
+		<li id="element_3">
+		<h2><a href="/formMaker/drupal">Socionity Education Templates</a></h2>
+		</li><li id="element_4">
+		<h2>If you are not able to view properly,then download</br><a href="https://www.google.com/intl/en/chrome/browser/">[Chrome browser]</a></h2>
+		</li></ul>
+
+		<div id="footer">
+			Generated by <a href="http://www.phpform.org">pForm</a>
+		</div>
+	</div>
+	<!--img id="bottom" src="bottom.png" alt=""-->
+	</body>
+</html>

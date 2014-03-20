@@ -1,0 +1,50 @@
+#logo{ padding-left:1px;}
+#columnA_3columns{padding-left: 0em;}
+h2.title a{font-size:20px;}
+
+div.fixed
+{
+width: 950px !important;
+}
+#columnB_3columns h2 {color: #66000f;font-size:20px;
+border-bottom-width: 1px;
+border-bottom-style: dotted;
+border-bottom-color: #e1e1e1;
+position: relative;}
+#columnA_3columns .profile h3{font-size:18px;
+border-bottom-width: 1px;
+border-bottom-style: dotted;
+border-bottom-color: #e1e1e1;
+position: relative;
+width:150px;}
+#columnA_3columns h1.title{font-size:20px;color: #66000f;border-bottom-width: 1px;
+border-bottom-style: dotted;
+border-bottom-color: #e1e1e1;
+position: relative;}
+#columnC_3columns h2.title{font-size:18px;color: #66000f;border-bottom-width: 1px;
+border-bottom-style: dotted;
+border-bottom-color: #e1e1e1;
+position: relative;}
+#columnC_3columns h3{font-size:16px;padding-top:5px;border-bottom-width: 1px;
+border-bottom-style: dotted;
+border-bottom-color: #e1e1e1;
+position: relative;}
+#columnA_3columns .admin-panel h3{ font-size:18px;padding-top:10px; }
+ul.primary
+
+{
+padding-left: 1em;
+margin-top: 1px;
+margin-right: 1px;
+margin-bottom: 0px;
+margin-left: 1px;
+height: auto;
+font-size:10px;
+border-bottom-width: 1px;
+border-bottom-style: solid;
+border-bottom-color: #faf8e9;
+padding-top:10px;
+}
+#menu li a{padding: 1.0em 1.2em 1.0em 1.2em;}
+ul.primary{
+	font-size:11px;}

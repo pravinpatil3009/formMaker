@@ -1,0 +1,1 @@
+Drupal.locale = { 'pluralFormula': function($n) { return Number(($n!=1)); }, 'strings': { "Default": "मुळस्वरुप", "Edit": "संपादन", "Value": "मान", "Remove": "मिटावा", "Select all rows in this table": "या टेबल मधील सर्व ओळी निवडा" } };

@@ -1,0 +1,78 @@
+<?php
+
+
+function pravin_help($path,$arg)
+{
+	$output="";
+	switch($path)
+	{
+		case "admin/help#pravin":
+			$output = "This module displays the forms of different languages on different pages\n";
+		break;
+	}
+	return $output;
+}
+
+function pravin_menu()
+{
+	$items['pravin/english'] = array(
+			'title' => 'English Forms',
+			'page callback' => 'pravin_forms',
+			'page arguments' => array('en'),
+			'access callback' => 'user_access',
+			'access arguments' => array('access pravin pages'),
+			'type' => MENU_CALLBACK,
+			);
+	$items['pravin/hindi'] = array(
+			'title' => 'Hindi Forms',
+			'page callback' => 'pravin_forms',
+			'page arguments' => array('hi'),
+			'access callback' => 'user_access',
+			'access arguments' => array('access pravin pages'),
+			'type' => MENU_CALLBACK,
+			);
+	$items['pravin/telugu'] = array(
+			'title' => 'Telugu Forms',
+			'page callback' => 'pravin_forms',
+			'page arguments' => array('te'),
+			'access callback' => 'user_access',
+			'access arguments' => array('access pravin pages'),
+			'type' => MENU_CALLBACK,
+			);
+	$items['pravin/neutral'] = array(
+			'title' => 'Telugu Forms',
+			'page callback' => 'pravin_forms',
+			'page arguments' => array(''),
+			'access callback' => 'user_access',
+			'access arguments' => array('access pravin pages'),
+			'type' => MENU_CALLBACK,
+			);
+
+	return $items;
+}
+
+function pravin_perm()
+{
+	return array('access pravin pages');
+}
+
+function pravin_forms($lang)
+{
+	$header = array('Name','Link');
+	$rows = array();
+	if (user_access('access pravin pages'))
+	{
+		$final_ans = array();
+		$query = "Select nid From {node} where language='%s'; ";
+		$ret = db_query($query,$lang);
+		while($nid = db_fetch_array($ret))
+		{
+			$node = node_load($nid);
+			$link = l(t('Go to form'),'node/'.$node->nid);
+			$rows[] = array($node->title,$link); 
+		}
+		return theme('table',$header,$rows);
+	}
+}
+
+

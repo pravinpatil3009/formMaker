@@ -1,0 +1,36 @@
+<?php
+
+
+function custom_menu() {
+	//path with autocomplete function with names of recordings
+	$items[custom/autocomplete] = array(
+	   'title' => 'Autocomplete for name',
+	   'page callback' => '_custom_autocomplete',
+	   'access arguments' => array('use autocomplete'),
+	   'type' => MENU_CALLBACK
+	);
+	return $items;
+}
+
+
+
+/**
+* autocomplete helper
+* $string = string for search
+
+
+function _custom_autocomplete($string) {
+     $matches = array();
+	//search table `recordings` for name that begin with the letters that user enters into the form
+
+	$result = db_query_range("SELECT city FROM {cities} WHERE LOWER(city) LIKE LOWER('%s%')", $string, 0, 10);
+
+	// add matches to $matches
+
+	while ($data = db_fetch_object($result)) {
+	$matches[$data->city] = check_plain($data->city);
+	}
+	// return for JS
+	print drupal_to_js($matches);
+	exit();
+}

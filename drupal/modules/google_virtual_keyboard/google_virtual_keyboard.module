@@ -1,0 +1,240 @@
+<?php  
+// $Id: google_virtual_keyboard.module,v 1.2 2010/12/21 04:13:04 confiz Exp $ 
+
+/**
+ * @file
+ * Enables google virtual keyboard for different languages that will be displayed in the dropdown menu
+ * shown at the top-right corner of the window.
+ */
+
+//Constants
+define("GOOGLE_VIRTUAL_KEYBOARD_BACKGROUND_COLOR", "BBCCFF");
+define("GOOGLE_VIRTUAL_KEYBOARD_FOREGROUND_COLOR", "A9A9A9");
+
+/**
+ * Implementation of hook_help().
+ */
+function google_virtual_keyboard_help($path, $arg) {
+  switch ($path) {
+    case  'admin/help#google_virtual_keyboard':
+      return '<p>' . t('Google virtual keyboard allows users to type using many languages. By integrating with google virtual keyboard, you can use it to allow your users to easily type using many languages in all the HTML forms on your website, including email, forums, search boxes, comment forms, etc..') . '</p>';
+  }
+}
+
+/**
+ * Implementation of  hook_perm().
+ *
+ */
+function google_virtual_keyboard_perm() {
+  return array('administer google virtual keyboard');
+}
+
+/**
+ * Implementation of hook_init().
+ * Checks if required files and modules exist and if not,
+ * it displays an error message
+ */
+function google_virtual_keyboard_init() {
+  $path = drupal_get_path('module', 'google_virtual_keyboard');
+  global $user;
+  if (user_access('administer google virtual keyboard', $user) && google_virtual_keyboard_perm()) {
+    if (!file_exists($path . '/js/jquery-1.4.2.min.js') || !file_exists($path . '/js/jquery-ui-1.8.6.custom.min.js')) {
+      drupal_set_message(t('The required js folder is missing for the google virtual keyboard module to be installed.
+      Please download the <strong>jquery-ui [version: 1.8.6, component: draggable]</strong> from !jqueryui and unzip the js folders to !google_virtual_keyboard.',
+      array('!jqueryui' => l('http://jqueryui.com/download', 'http://jqueryui.com/download',
+      array('html' => TRUE, ),array('attributes' => array('target' => '_blank'))), '!google_virtual_keyboard' => '<strong>[modules_folder]/google_virtual_keyboard/js</strong>',
+      )), 'error');
+    }
+    elseif (google_virtual_keyboard_visibility_check()) {
+      drupal_add_js($path .'/js/jquery-1.4.2.min.js', 'module');
+      drupal_add_js($path .'/js/jquery-ui-1.8.6.custom.min.js', 'module');
+      drupal_add_css($path .'/google_virtual_keyboard.css', 'module', 'all', FALSE);
+      drupal_add_js($path .'/google_virtual_keyboard.js', 'module');
+      $src = variable_get('google_virtual_keyboard_api_path', 'http://www.google.com/jsapi');
+      if ($src) {
+        drupal_set_html_head("<script type='text/javascript' src='$src'></script>"); //inline javascript
+      }
+      $languages = variable_get('google_virtual_keyboard_languages', 0);
+      if ($languages) {
+        drupal_add_js(array('google_virtual_keyboard' => array('languages' => $languages)), 'setting');
+      }
+      $background_color = variable_get('background_color', GOOGLE_VIRTUAL_KEYBOARD_BACKGROUND_COLOR);
+      if ($background_color) {
+        drupal_add_js(array('google_virtual_keyboard' => array('backgroundColor' => $background_color)), 'setting');
+      }
+      $foreground_color =variable_get('foreground_color', GOOGLE_VIRTUAL_KEYBOARD_FOREGROUND_COLOR);
+      if ($foreground_color) {
+        drupal_add_js(array('google_virtual_keyboard' => array('foregroundColor' => $foreground_color)), 'setting');
+      }
+    }    
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function google_virtual_keyboard_menu() {
+  $items['admin/settings/google-virtual-keyboard'] = array(
+    'title' => t('Google virtual keyboard settings'),
+    'description' => t('Configure google virtual keyboard\'s options'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('google_virtual_keyboard_admin'),
+    'access arguments' => array('administer google virtual keyboard')
+  );
+  return $items;
+}
+
+/*
+ * Returns language codes and names
+ * @return array 
+ *   An associated array containing language code and name as key and value pair respectively.
+ **/
+function google_virtual_keyboard_supported_languages() {
+  return array('sq' => 'ALBANIAN', 'ar' => 'ARABIC', 'hy_east' => 'ARMENIAN_EASTERN', 'hy_west' => 'ARMENIAN_WESTERN', 
+   'eu' => 'BASQUE', 'be' => 'BELARUSIAN', 'bn_phone' => 'BENGALI_PHONETIC', 'bs' => 'BOSNIAN', 'pt_br' => 'BRAZILIAN_PORTUGUESE',
+   'bg' => 'BULGARIAN', 'ca' => 'CATALAN', 'hr' => 'CROATIAN', 'cs' => 'CZECH', 'cs_qwertz' => 'CZECH_QWERTZ', 'da' => 'DANISH', 'prs' => 'DARI',
+   'nl' => 'DUTCH', 'deva_phone' => 'DEVANAGARI_PHONETIC', 'et' => 'ESTONIAN', 'ethi' => 'ETHIOPIC', 'fi' => 'FINNISH', 'fr' => 'FRENCH', 'gl' => 'GALICIAN',
+   'ka_qwerty' => 'GEORGIAN_QWERTY', 'ka_typewriter' => 'GEORGIAN_TYPEWRITER', 'de' => 'GERMAN', 'el' => 'GREEK', 'gu_phone' => 'GUJARATI_PHONETIC',
+   'guru_phone' => 'GURMUKHI_PHONETIC', 'he' => 'HEBREW', 'hi' => 'HINDI', 'hu_101' => 'HUNGARIAN_101', 'is' => 'ICELANDIC', 'it' => 'ITALIAN',
+   'kn_phone' => 'KANNADA_PHONETIC', 'kk' => 'KAZAKH', 'km' => 'KHMER', 'ko' => 'KOREAN', 'ky_cyrl' => 'KYRGYZ', 'lo' => 'LAO',
+   'lv' => 'LATVIAN', 'lt' => 'LITHUANIAN', 'ml_phone' => 'MALAYALAM_PHONETIC', 'mt' => 'MALTESE', 'mn_cyrl' => 'MONGOLIAN_CYRILLIC', 'srp' => 'MONTENEGRIN',
+   'no' => 'NORWEGIAN', 'or_phone' => 'ORIYA_PHONETIC', 'latn_002' => 'PAN_AFRICA_LATIN', 'ps' => 'PASHTO', 'fa' => 'PERSIAN', 'pl' => 'POLISH', 'pt_pt' => 'PORTUGUESE',
+   'rom' => 'ROMANI', 'ro' => 'ROMANIAN', 'ru' => 'RUSSIAN', 'sa_phone' => 'SANSKRIT_PHONETIC', 'sr_cyrl' => 'SERBIAN_CYRILLIC', 'sr_latn' => 'SERBIAN_LATIN',
+   'si' => 'SINHALA', 'sk' => 'SLOVAK', 'sk_qwerty' => 'SLOVAK_QWERTY', 'sl' => 'SLOVENIAN', 'uzs' => 'SOUTHERN_UZBEK', 'es_es' => 'SPANISH', 'sv' => 'SWEDISH',
+   'ta_phone' => 'TAMIL_PHONETIC', 'tt' => 'TATAR', 'te_phone' => 'TELUGU_PHONETIC', 'th' => 'THAI', 'tr_f' => 'TURKISH_F', 'tr_q' => 'TURKISH_Q', 'ug' => 'UIGHUR', 'uk_101' => 'UKRAINIAN_101',
+   'ur' => 'URDU', 'uz_latn' => 'UZBEK_LATIN', 'uz_cyrl_phone' => 'UZBEK_CYRILLIC_PHONETIC', 'uz_cyrl_type' => 'UZBEK_CYRILLIC_TYPEWRITTER',  'vi_tcvn' => 'VIETNAMESE_TCVN',
+   'vi_telex' => 'VIETNAMESE_TELEX',    'vi_viqr' => 'VIETNAMESE_VIQR');
+}
+
+/**
+ * Displays admin settings form for Google Virtual Keyboard
+ * @return
+ *  A form with radio-buttons, textarea, multi-select and color picker
+ */
+function google_virtual_keyboard_admin() {
+  //loads the default values for setting form
+  $settings = google_virtual_keyboard_get_settings();        
+  $form['paths_and_languages'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Paths and languages'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE
+   );
+  $form['paths_and_languages']['google_virtual_keyboard_apis_paths'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Google virtual keyboard APIs path'),
+    '#description' => t('Enter the path for google virtual keyboard APIs'),
+    '#default_value' => $settings['google_virtual_keyboard_api_path'],
+  );
+  $form['paths_and_languages']['google_virtual_keyboard_paths_options'] = array(
+    '#type' => 'radios',
+    '#title' => t('Show google virtual keyboard on specific pages'),
+    '#default_value' => $settings['google_virtual_keyboard_paths_options'],
+    '#options' => array(t('Show on every page except the listed pages.'), t('Show on only the listed pages.')),
+  );
+  $form['paths_and_languages']['google_virtual_keyboard_paths'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Paths',
+    '#description' => t('Enter the drupal path of pages, where you want to show google virtual keyboard, one path per line. The \'*\' character is a wildcard. Example paths are <em>node/add/page</em> for the node pages and <em>node/*</em> for every node. <em>&lt;front&gt;</em> is the front page.'),
+    '#default_value' => $settings['google_virtual_keyboard_paths'],
+  );
+  $form['paths_and_languages']['google_virtual_keyboard_languages'] = array(
+    '#type' => 'select',
+    '#title' => t('Languages'),
+    '#options' => google_virtual_keyboard_supported_languages(),
+    '#default_value' => $settings['google_virtual_keyboard_languages'],
+    '#multiple' => TRUE,
+    '#size' => 18,
+    '#weight' => 8,
+    '#description' => t('Select the languages for which you want to enable google virtual keyboard'),
+  );
+  $form['paths_and_languages']['colors'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Color settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => 10,
+  );
+  $form['paths_and_languages']['colors']['background_color'] = array(
+    '#type' => 'colorpicker',
+    '#title' => t('Background color'),
+    '#default_value' => $settings['google_virtual_keyboard_background_color'],    
+  );
+  $form['paths_and_languages']['colors']['foreground_color'] = array(
+    '#type' => 'colorpicker',
+    '#title' => t('Foreground color'),
+    '#default_value' => $settings['google_virtual_keyboard_foreground_color'],    
+  );
+
+  return system_settings_form($form);
+}
+
+/** 
+ * Store values obtained from Google Virtual keyboard settings form
+ * @return mixed 
+ */
+function google_virtual_keyboard_get_settings() {
+  $settings = array(
+    'google_virtual_keyboard_api_path'  => variable_get('google_virtual_keyboard_api_path', 'http://www.google.com/jsapi'),
+    'google_virtual_keyboard_paths' => variable_get('google_virtual_keyboard_paths', 'node/add/page'),
+    'google_virtual_keyboard_languages' => variable_get('google_virtual_keyboard_languages', 0),
+    'google_virtual_keyboard_paths_options' => variable_get('google_virtual_keyboard_paths_options', 0),
+    'google_virtual_keyboard_background_color' => variable_get('background_color', GOOGLE_VIRTUAL_KEYBOARD_BACKGROUND_COLOR),
+    'google_virtual_keyboard_foreground_color' => variable_get('foreground_color', GOOGLE_VIRTUAL_KEYBOARD_FOREGROUND_COLOR),
+  );
+  return $settings;  
+}
+
+/** 
+ * Generate HTML for Language drop down shown at the top-right corner 
+ * @param
+ *  Array of languages selected from settings form
+ * @return
+ *  HTML generated
+ */
+function google_virtual_keyboard_display_language_menu() {  
+  $display_options_html .= "";  
+  $display_options_html .= "<div id='language-menu-wrapper' class='ui-widget-content'>
+                              <div class='menu-text'>Choose a Language</div>
+                              <div id='min-max-button' class='min-img-button'></div>
+                              <div class='clearer'></div>
+                              <div class='language-menu-dropdown'></div>
+                            </div>";
+  return $display_options_html;
+}
+
+/**
+ * Implements hook_footer().
+ */
+function google_virtual_keyboard_footer($main = 0) {
+  $output = '';
+  //Gets recently saved google virtual keyboard form settings
+  $settings = google_virtual_keyboard_get_settings();  
+  $google_virtual_keyboard_api_js = $settings['google_virtual_keyboard_api_path'];
+  $google_virtual_keyboard_paths = $settings['google_virtual_keyboard_paths'];
+  $google_virtual_keyboard_language = $settings['google_virtual_keyboard_languages'];
+  $google_virtual_keyboard_bacground_color = $settings['google_virtual_keyboard_bacground_color'];
+  $google_virtual_keyboard_foreground_color = $settings['google_virtual_keyboard_foreground_color'];
+  //Enables google virtual keyboard based on languages and paths defined
+  if (google_virtual_keyboard_visibility_check()) {       
+    $output .= google_virtual_keyboard_display_language_menu();
+  }
+  return $output;
+}
+
+/**
+ * Enable / Disable google virtual keyboard on pages specified by admin in the settings page.
+ * @return
+ *  0 for pages where keyboard is disabled
+ *  1 for pages where keyboard is enabled
+ */
+function google_virtual_keyboard_visibility_check() {
+  $path = drupal_get_path_alias($_GET['q']);
+  //compare current path with paths specified on the settings page.
+  $page_match = drupal_match_path($path, variable_get('google_virtual_keyboard_paths', ''));
+  if ($path != $_GET['q']) {
+      $page_match = $page_match || drupal_match_path($_GET['q'], variable_get('google_virtual_keyboard_paths', ''));
+  }  
+  $page_match = !(variable_get('google_virtual_keyboard_paths_options', 0) xor $page_match);
+  return $page_match;
+}

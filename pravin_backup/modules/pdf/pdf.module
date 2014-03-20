@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function pdf_menu() {
+  $items = array();
+  $items['pdf/worker_loader.js'] = array(
+    'page callback' => 'pdf_worker_loader_js',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  $items['file/pdf_viewer/%node'] = array( //%node to make a node_load
+    'page callback' => 'pdf_js_viewer',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function pdf_theme() {
+  $theme = array(
+    'pdf_formatter_iframe' => array(
+      'arguments' => array('element' => NULL)
+    ),
+    'pdf_formatter_thumbnail' => array(
+      'arguments' => array('element' => NULL)
+    ),
+    'pdf_viewer' => array(
+      'template' => 'pdf-viewer',
+      'arguments'  => array('file' => NULL, 'node' => NULL, 'language' => NULL)
+    )
+  );
+  return $theme;
+}
+
+function pdf_js_viewer($node) {
+  //if needed take localization into account...
+  global $language;
+  $file = $node->field_filefield[0];
+
+  print theme('pdf_viewer', $file, $node, $language);
+  exit();
+}
+
+/**
+ * Preprocessor for theme function pdf_viewer
+ */
+function template_preprocess_pdf_viewer(&$variables) { 
+  $variables['nid'] = $variables['node']->nid;
+  $variables['file_url'] = file_create_url($variables['file']['filepath']);
+}
+
+function pdf_worker_loader_js() {
+  global $base_url;
+  $output = "importScripts('$base_url/sites/all/libraries/pdf.js/build/pdf.js');";
+  print $output;
+  exit();
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function pdf_field_formatter_info() {
+  return array(
+    'iframe' => array(
+      'label' => t('PDF iframe'),
+      'field types' => array('filefield'),
+    ),
+    'thumbnail' => array(
+      'label' => t('PDF first page'),
+      'field types' => array('filefield'),
+    )
+  );
+}
+
+/**
+ * Formatter theme function for file fields : default: function calls hook_menu file/pdf_viewer/%node which calls pdf_js_viewer
+ */
+function theme_pdf_formatter_iframe($element) {
+  global $language;
+  $content = '<iframe class="pdf" frameborder="no" width="100%" height="1050px" src="';
+  $content .= $language->language . '/file/pdf_viewer/' . $element['#node']->nid;
+  $content .= '"></iframe>';
+  return $content;
+}
+
+/**
+ * Formatter theme function for file fields : thumbnail
+ */
+function theme_pdf_formatter_thumbnail($element) {
+  if (isset($element['#item'])) {
+    $file_url = file_create_url($element['#item']['filepath']);
+  }
+  
+  drupal_add_js('sites/all/libraries/pdf.js' . '/build/pdf.js');
+
+  $worker_loader = url('pdf/worker_loader.js');
+  $js = "PDFJS.workerSrc = '$worker_loader';";
+  $js .= "'use strict';
+  PDFJS.getDocument('$file_url').then(function(pdf) {
+    pdf.getPage(1).then(function(page) {
+      var scale = 1.5;
+      var viewport = page.getViewport(scale);
+      var canvas = document.getElementById('the-canvas');
+      var context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      var renderContext = {
+        canvasContext: context,
+        viewport: viewport
+      };
+      page.render(renderContext);
+    });
+  });
+  ";
+
+  drupal_add_js($js, 'inline', 'footer', FALSE, TRUE, FALSE);
+  $output = '<canvas id="the-canvas" style="width:100%; border:1px solid black;"/>';
+  return $output;
+}

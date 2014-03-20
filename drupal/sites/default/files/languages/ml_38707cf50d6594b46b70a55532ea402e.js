@@ -1,0 +1,1 @@
+Drupal.locale = { 'pluralFormula': function($n) { return Number(($n!=1)); }, 'strings': { "Unspecified error": "അറിയപ്പെടാത്ത പ്രശ്നം", "Edit": "തിരുത്തുക", "Join summary": "ചുരുക്കരൂപം കൂട്ടിചേര്‍ക്കു.", "Value": "മൂല്യം" } };

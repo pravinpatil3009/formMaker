@@ -1,0 +1,52 @@
+/* $Id: google_virtual_keyboard.css,v 1.1 2010/09/03 11:43:52 confiz Exp $ */ 
+#language-menu-wrapper {
+  position: fixed;
+  _position: absolute;
+  top: 20px;
+  right: 1px;
+  font-size: 14px;
+  font-family: 'Times New Roman',Times,serif;
+  font-variant: inherit;
+  width: 240px;
+  height: auto;
+  padding: 0.5em;
+  cursor: move;
+  text-align: left;
+  border-width: 1px;
+  border-color: #6B90DA;
+  border-style: solid;
+  float: right;
+  z-index: 1000;
+  clear: both;
+}
+.language-menu-dropdown {
+  background-color: #BBCCFF;
+  border-top-width: 1px; 
+  border-top-style: solid;
+}
+.clearer{
+  clear: both;
+  float: none;
+}
+.menu-text{
+  float: left;  
+}
+div#kbd {
+  position: fixed !important;
+  _position: inherit !important;
+}
+#min-max-button{
+  height: 16px;
+  width: 16px;
+  border:none;
+  float: right;
+  cursor:pointer;
+}
+.min-img-button{
+  background-image: url(images/icon-minimize.gif);
+  background-repeat: no-repeat;
+}
+.max-img-button{
+  background-image: url(images/icon-maximize.gif);
+  background-repeat: no-repeat;
+}

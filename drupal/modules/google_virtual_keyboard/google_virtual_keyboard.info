@@ -1,0 +1,18 @@
+; $Id: google_virtual_keyboard.info,v 1.2 2010/12/21 04:13:04 confiz Exp $ 
+name = Google virtual keyboard
+description = Integrates <a href="http://code.google.com/apis/ajaxlanguage/documentation/#Keyboard" target="_blank">google virtual keyboard</a> into Drupal.
+dependencies[] = jquery_colorpicker
+core = 6.x
+; Information added by drupal.org packaging script on 2010-09-03
+version = "6.x-1.0"
+core = "6.x"
+project = "google_virtual_keyboard"
+datestamp = "1283514407"
+
+
+; Information added by drupal.org packaging script on 2010-12-21
+version = "6.x-1.1"
+core = "6.x"
+project = "google_virtual_keyboard"
+datestamp = "1292904990"
+

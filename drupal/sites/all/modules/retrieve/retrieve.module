@@ -1,0 +1,66 @@
+<?php
+
+function retrieve_menu()
+{
+	$items = array();
+	$items['retrieve'] = array(
+			'title' => 'Retrieve',
+			'page callback' => 'retrieve_info', 
+			'access callback' => true,
+			'type' => MENU_CALLBACK,
+			);
+	return $items;
+}
+
+
+function retrieve_info()
+{
+	$output = drupal_get_form('retrieve_form');
+	return $output;
+}
+
+
+
+function retrieve_form($form_state)
+{
+	drupal_set_title('Retrieve information from Education Templates');
+	$form = array();
+	$form['keyword'] = array(
+			'#title' => 'Keyword to search',
+			'#type'  => 'textfield',
+			'#size'  => '30',
+			);
+	$form['place'] = array(
+			'#title'    => 'Place of search' ,
+			'#type'     => 'checkboxes',
+			'#options'  => array('venkatrampuram' => "Venkatrampuram", 'belgaum' => "Belgaum"),
+			);
+	$form['submit'] = array(
+			'#type' => 'submit',
+			'#value' => 'Submit',
+			);
+	return $form;
+}
+
+
+function retrieve_form_submit($form,$form_state)
+{
+	dpm($form_state);
+	drupal_set_message('I am here');
+	$query = "Select nid From {node} where nid=9; ";
+	$rows = array();
+	$header = array('Name','Link');
+	$ret = db_query($query);
+	dpm($ret);
+	while($nid = db_fetch_array($ret))
+	{
+		$node = node_load($nid);
+		$link = l(t('Go to form'),'node/'.$node->nid);
+		$rows[] = array($node->title,$link);
+	}
+	return theme('table',$header,$rows);
+
+
+}
+
+

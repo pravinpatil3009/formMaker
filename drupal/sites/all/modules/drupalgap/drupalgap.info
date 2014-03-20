@@ -1,0 +1,15 @@
+name = DrupalGap
+description = Provides a bridge between Drupal and mobile device applications.
+core = 6.x
+package = Mobile
+dependencies[] = services
+dependencies[] = rest_server
+dependencies[] = views_json
+dependencies[] = autoload
+
+; Information added by drupal.org packaging script on 2012-05-17
+version = "6.x-1.1"
+core = "6.x"
+project = "drupalgap"
+datestamp = "1337214356"
+

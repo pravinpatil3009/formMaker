@@ -1,0 +1,17 @@
+name = PDF
+description = Display PDF file in Drupal without external readers and plugins. 
+core = 6.x
+dependencies[] = content
+
+version = "6.x-1.0"
+core = "6.x"
+project = "pdf"
+
+
+
+; Information added by drupal.org packaging script on 2012-11-08
+version = "6.x-1.0"
+core = "6.x"
+project = "pdf"
+datestamp = "1352395381"
+

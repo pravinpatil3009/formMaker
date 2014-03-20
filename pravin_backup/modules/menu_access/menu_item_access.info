@@ -1,0 +1,13 @@
+name = "Menu Item Access"
+description = "Provides flexible menu item access control."
+dependencies[] = menu
+dependencies[] = menu_access
+package = Access control
+
+
+; Information added by drupal.org packaging script on 2011-05-04
+version = "6.x-1.9"
+core = "6.x"
+project = "menu_access"
+datestamp = "1304528216"
+
